@@ -1,7 +1,29 @@
 .container{
-    padding: 20px;
+    padding: 1.6rem;
 }
 
 button span{
-    padding-left: 10px;
+    padding-left: 0.7rem;
+}
+
+.fullscreen,
+.fullscreen .column{
+    padding: 0 !important;
+}
+
+
+.sticky{
+    position: fixed;
+    z-index: 99;
+    top: 0;
+    left: 0;
+}
+
+.sticky-full{
+    background-color: hsl(171, 100%, 41%);
+    width: 100%;
+}
+
+.sticky button{
+    margin: 0.5rem;
 }

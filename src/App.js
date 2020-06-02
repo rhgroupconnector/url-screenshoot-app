@@ -17,25 +17,35 @@ class App extends Component {
     this.state = {
       records: []
     }
+    this._isMounted = false;
   }
-  async componentDidMount(){
-    console.log(this.props)
+  componentDidMount(){
+    this._isMounted = true;
+    if(this._isMounted){
+      this.fetchRecords();
+    }
+  }
+
+  componentWillUnmount(){
+    this._isMounted = false;
+  }
+
+  routeTo = (path, state) => {
+    this.props.history.push('/' + path, [state])
+  }
+
+  async fetchRecords(){
     await base('Table 1').select({
       filterByFormula: "NOT({URL} = '')",
       view: "Grid view"
     }).eachPage(
       (records, fetchNextPage) => {
         if(records){
-          console.log(records)
-          this.setState({records});
+            this._isMounted && this.setState({records});
         }
         fetchNextPage();
       }
     );
-  }
-
-  routeTo = (path, state) => {
-    this.props.history.push('/' + path, [state])
   }
 
   render(){
@@ -57,25 +67,31 @@ class App extends Component {
                     </td>
                     <td>
                       <Tag 
-                        color={record.fields['Result'] == 'SUCCEEDED' ? 'success' : 
-                              (record.fields['Result'] != 'FAILED' ? 'info' :'danger')}>
+                        color={record.fields['Result'] === 'SUCCEEDED' ? 'success' : 
+                              (record.fields['Result'] !== 'FAILED' ? 'info' :'danger')}>
                         {record.fields['Result']}
                       </Tag>
                     </td>
                     <td>
-                      {record.fields['Result'] == "SUCCEEDED" ? 
+                      {record.fields['Result'] === "SUCCEEDED" ? 
                       <Button.Group>
                         <Button color="primary" 
                             onClick={() => 
                                 this.routeTo(record.fields['Slug for page'] + '/mobile',
-                                            { imgSrc : record.fields['Screenshot Mobile']})}> 
+                                            { 
+                                              imgSrcDefault : record.fields['Screenshot Mobile'][0].url,
+                                              imgSrcSub : record.fields['Screenshot Desktop'][0].url
+                                            })}> 
                           <FontAwesomeIcon icon={faMobileAlt}>
                           </FontAwesomeIcon>
                         </Button>
                         <Button color="info" 
                             onClick={() => 
                               this.routeTo(record.fields['Slug for page'] + '/desktop',
-                                          { imgSrc: record.fields['Screenshot Desktop']})}>
+                                          { 
+                                            imgSrcDefault : record.fields['Screenshot Desktop'][0].url,
+                                            imgSrcSub: record.fields['Screenshot Mobile'][0].url
+                                          })}>
                           <FontAwesomeIcon icon={faLaptop}></FontAwesomeIcon>
                         </Button>
                       </Button.Group>
