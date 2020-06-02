@@ -43,7 +43,6 @@ class App extends Component {
         if(records){
             this._isMounted && this.setState({records});
         }
-        console.log(records)
         fetchNextPage();
       }
     );
