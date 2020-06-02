@@ -55,20 +55,19 @@ class DeviceView extends React.Component{
     resizeWindow(){
         let windowWidth = window.innerWidth;
         let currentUrl = this.props.match.url;
-        let pathName = "../" + this.props.match.params.slug + "/";
 
-        if(currentUrl.includes("desktop") && windowWidth <= 480 && this._isMounted){
-            this.routeTo(pathName + "mobile");
-            this.setState({
-                imgSrc: this.propsState.imgSrcSub
-            });
-        }
+        if(currentUrl.includes("desktop") && this._isMounted ){
+            if(windowWidth <= 480){
+                this.setState({
+                    imgSrc: this.propsState.imgSrcSub
+                });
+            }
 
-        if(currentUrl.includes("mobile") && windowWidth > 480 && this._isMounted){
-                this.routeTo(pathName + "desktop");
+            if(windowWidth > 480){
                 this.setState({
                     imgSrc: this.propsState.imgSrcDefault
                 });
+            }
         }
     }
 
