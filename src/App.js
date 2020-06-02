@@ -43,6 +43,7 @@ class App extends Component {
         if(records){
             this._isMounted && this.setState({records});
         }
+        console.log(records)
         fetchNextPage();
       }
     );
@@ -80,7 +81,11 @@ class App extends Component {
                                 this.routeTo(record.fields['Slug for page'] + '/mobile',
                                             { 
                                               imgSrcDefault : record.fields['Screenshot Mobile'][0].url,
-                                              imgSrcSub : record.fields['Screenshot Desktop'][0].url
+                                              imgSrcSub : record.fields['Screenshot Desktop'][0].url,
+                                              customScripts: {
+                                                inBody: record.fields['In body'],
+                                                inHead: record.fields['In head']
+                                              }
                                             })}> 
                           <FontAwesomeIcon icon={faMobileAlt}>
                           </FontAwesomeIcon>
@@ -90,7 +95,11 @@ class App extends Component {
                               this.routeTo(record.fields['Slug for page'] + '/desktop',
                                           { 
                                             imgSrcDefault : record.fields['Screenshot Desktop'][0].url,
-                                            imgSrcSub: record.fields['Screenshot Mobile'][0].url
+                                            imgSrcSub: record.fields['Screenshot Mobile'][0].url,
+                                            customScripts: {
+                                              inBody: record.fields['In body'],
+                                              inHead: record.fields['In head']
+                                            }
                                           })}>
                           <FontAwesomeIcon icon={faLaptop}></FontAwesomeIcon>
                         </Button>
