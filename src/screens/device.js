@@ -10,7 +10,7 @@ class DeviceView extends React.Component{
         this.state = {
             imgSrc : "",
             scrollPost: "",
-            innerWidth : ""
+            customScripts: ""
         }
         this._isMounted = false;
         this.useScrollPosition = this.useScrollPosition.bind(this);
@@ -26,17 +26,30 @@ class DeviceView extends React.Component{
 
         if(this._isMounted){
             let imgSrc= this.propsState.imgSrcDefault;
-            this.setState({imgSrc});
+            let customScripts = this.propsState.customScripts;
+            let inHead = this.domParser(customScripts.inHead);
+            let inBody = this.domParser(customScripts.inBody);
+            
+            this.setState(
+                {
+                    imgSrc,
+                    customScripts: {
+                        inHead : inHead !== undefined ? inHead.childNodes[0] : undefined,
+                        inBody : inBody !== undefined ? inBody.childNodes[0] : undefined
+                }},
+                this.loadScripts
+            );
 
-            window.addEventListener('scroll', this.useScrollPosition)
-            window.addEventListener('resize', this.resizeWindow)
+            window.addEventListener('scroll', this.useScrollPosition);
+            window.addEventListener('resize', this.resizeWindow);
         }
     }
 
     componentWillUnmount(){
         this._isMounted = false;
-        window.removeEventListener('scroll', this.useScrollPosition)
-        window.removeEventListener('resize', this.resizeWindow)
+        window.removeEventListener('scroll', this.useScrollPosition);
+        window.removeEventListener('resize', this.resizeWindow);
+        this.unloadScripts();
     }
 
     resizeWindow(){
@@ -50,7 +63,6 @@ class DeviceView extends React.Component{
                 imgSrc: this.propsState.imgSrcSub
             });
         }
-      
 
         if(currentUrl.includes("mobile") && windowWidth > 480 && this._isMounted){
                 this.routeTo(pathName + "desktop");
@@ -58,6 +70,30 @@ class DeviceView extends React.Component{
                     imgSrc: this.propsState.imgSrcDefault
                 });
         }
+    }
+
+    loadScripts(){
+        if(this.state.customScripts.inHead !== undefined)
+            document.head.appendChild(this.state.customScripts.inHead);
+        
+        if(this.state.customScripts.inBody !== undefined)
+            document.body.appendChild(this.state.customScripts.inBody);
+    }
+
+    unloadScripts(){
+        if(this.state.customScripts.inHead !== undefined)
+            document.head.removeChild(this.state.customScripts.inHead);
+        
+        if(this.state.customScripts.inBody !== undefined)
+            document.body.removeChild(this.state.customScripts.inBody);
+    }
+
+    domParser = (stringToParse) => {
+        if(stringToParse !== undefined){
+            return new DOMParser().parseFromString(stringToParse, "application/xml");
+        }
+
+        return undefined;
     }
 
     useScrollPosition(event){
