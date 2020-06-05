@@ -25,17 +25,17 @@ class DeviceView extends React.Component{
         this._isMounted = true;
 
         if(this._isMounted){
-            let imgSrc= this.propsState.imgSrcDefault;
+            const imgSrc= this.propsState.imgSrcDefault;
             let customScripts = this.propsState.customScripts;
-            let inHead = this.domParser(customScripts.inHead);
-            let inBody = this.domParser(customScripts.inBody);
-            
+            const inHead = this.domParser(customScripts.inHead);
+            const inBody = this.domParser(customScripts.inBody);
+
             this.setState(
                 {
                     imgSrc,
                     customScripts: {
-                        inHead : inHead !== undefined ? inHead.childNodes[0] : undefined,
-                        inBody : inBody !== undefined ? inBody.childNodes[0] : undefined
+                        inHead : inHead !== undefined ? inHead : undefined,
+                        inBody : inBody !== undefined ? inBody : undefined
                 }},
                 this.loadScripts
             );
@@ -73,34 +73,82 @@ class DeviceView extends React.Component{
 
     loadScripts(){
         if(this.state.customScripts.inHead !== undefined)
-            document.head.appendChild(this.state.customScripts.inHead);
+            this.appendRemoveChildren(this.state.customScripts.inHead, 0, true);
         
         if(this.state.customScripts.inBody !== undefined)
-            document.body.appendChild(this.state.customScripts.inBody);
+            this.appendRemoveChildren(this.state.customScripts.inBody, 0);
     }
 
     unloadScripts(){
         if(this.state.customScripts.inHead !== undefined)
-            document.head.removeChild(this.state.customScripts.inHead);
+            this.appendRemoveChildren(this.state.customScripts.inHead, 1, true);
         
         if(this.state.customScripts.inBody !== undefined)
-            document.body.removeChild(this.state.customScripts.inBody);
+            this.appendRemoveChildren(this.state.customScripts.inBody, 1);
     }
 
-    domParser = (stringToParse) => {
-        if(stringToParse !== undefined){
-            return new DOMParser().parseFromString(stringToParse, "application/xml");
+    /**
+     * Append/Remove Children Node
+     * @param nodeList Child Nodes and a result from parseFromString
+     * @param type  Action to take: 0 - append; 1 - remove
+     * @param inHead If set to true, the child nodes will be appended/removed in document.head. 
+     *               Default value is false, which will append to document.body
+     */
+    appendRemoveChildren(nodeList, type, inHead = false){  
+        if(type === 0){
+            for(let node = 0; node < nodeList.length; node++){   
+                if(inHead)
+                    document.head.appendChild(nodeList[node].cloneNode(true));
+                else 
+                    document.body.appendChild(nodeList[node].cloneNode(true));
+                
+                
+            }
+        }else if(type === 1){
+            for(let node = 0; node < nodeList.length; node++){
+                if(inHead)
+                    document.head.removeChild(document.head.lastChild)
+                else
+                    document.body.removeChild(document.body.lastChild)
+            }
         }
+    }
 
+    removeHTMLComments(str){
+        const regex = /<!--(.*?)-->/g;
+        return  str.trim().replace(regex, '');
+    }
+
+    domParser(stringToParse) {
+        const parser = new DOMParser();
+
+        if(stringToParse !== undefined){
+            const cleanHTML = this.removeHTMLComments(stringToParse);
+            // let parsedHtml = parser.parseFromString(cleanHTML, "application/xml"); 
+
+            // if(parsedHtml.getElementsByTagName('parsererror').length > 0){
+                let nodes = [];
+                const parsedHtml = parser.parseFromString(cleanHTML, "text/html");
+
+                if(parsedHtml.head.childNodes.length > 0){
+                    nodes = parsedHtml.head.childNodes;
+                }
+
+                if(parsedHtml.body.childNodes.length > 0){
+                    nodes = parsedHtml.body.childNodes;
+                }
+                return nodes;
+            // }
+
+            // return parsedHtml.childNodes;
+        }
+        
         return undefined;
     }
 
     useScrollPosition(event){
-        let scrollTop = event.srcElement.scrollingElement.scrollTop;
-
-        this.setState({
-            scrollPos: scrollTop
-        })
+        let scrollPos = event.srcElement.scrollingElement.scrollTop;
+        this.setState({ scrollPos })
     }
 
     render(){
